@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Customer {
+ id Int @id @default(autoincrement())
+ fullName String
+ email String @unique
+ phone String?
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+}
+
+model Producto {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  descripcion String?  @db.Text // @db.Text permite textos largos
+  sku         String   @unique  // SKU debe ser único para inventario
+  precio      Decimal  @db.Decimal(10, 2) // 10 dígitos total, 2 decimales (Evita errores de redondeo)
+  stock       Int      @default(0)
+  activo      Boolean  @default(true) // Para "borrado lógico" o pausar venta
+  
+  // Timestamps (Auditoría automática)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+  
+  // Mapeo opcional: si quieres que la tabla en la BD se llame "products" en inglés
+  @@map("productos") 
+}
