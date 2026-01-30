@@ -7,22 +7,22 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 export class CustomersController {
     constructor(private readonly customersService: CustomersService) { }
     @Post()
-    create(@Body() dto: CreateCustomerDto) {
+    async create(@Body() dto: CreateCustomerDto) {
     return this.customersService.create(dto);
     }
 
     @Get()
-    findAll() {
+    async findAll() {
     return this.customersService.findAll();
     }
 
     @Get(':id')
-    findOne(@Param('id', ParseIntPipe) id: number) {
+    async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.customersService.findOne(id);
     }
 
     @Patch(':id')
-    update(
+    async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCustomerDto
     ) {
@@ -31,7 +31,7 @@ export class CustomersController {
 
     @Delete(':id')
     @HttpCode(204)
-    remove(@Param('id', ParseIntPipe) id: number) {
+    async remove(@Param('id', ParseIntPipe) id: number) {
     return this.customersService.remove(id);
     }
 }
