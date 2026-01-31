@@ -21,19 +21,80 @@ model Customer {
  createdAt DateTime @default(now())
 }
 
-model Producto {
+model Product {
   id          Int      @id @default(autoincrement())
-  nombre      String
-  descripcion String?  @db.Text // @db.Text permite textos largos
-  sku         String   @unique  // SKU debe ser único para inventario
-  precio      Decimal  @db.Decimal(10, 2) // 10 dígitos total, 2 decimales (Evita errores de redondeo)
-  stock       Int      @default(0)
-  activo      Boolean  @default(true) // Para "borrado lógico" o pausar venta
+  name        String
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
-  // Timestamps (Auditoría automática)
-  creadoEn      DateTime @default(now())
-  actualizadoEn DateTime @updatedAt
-  
-  // Mapeo opcional: si quieres que la tabla en la BD se llame "products" en inglés
-  @@map("productos") 
+}
+
+model Student {
+  id          Int              @id @default(autoincrement())
+  fullName    String
+  email       String           @unique
+  createdAt   DateTime         @default(now())
+  // 1:1
+  Profile     StudentProfile?
+  // N:M explícita con campos extra
+  enrollments Enrollment[]
+}
+
+model StudentProfile {
+  id        Int     @id @default(autoincrement())
+  studentId Int     @unique
+  pone      String?
+  Address   String?
+  // 1:1: FK vive aquí
+  Student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Department {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  // 1:N
+  courses Course[]
+}
+
+model Course {
+  id           Int          @id @default(autoincrement())
+  code         String       @unique
+  title        String
+  departmentId Int
+  // 1:N: FK vive aquí
+  department   Department   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  // N:M implícita
+  tags         Tag[]
+  // N:M explícita
+  enrollments  Enrollment[]
+}
+
+model Tag {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  // N:M implícita con Course
+  courses Course[]
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  DROPPED
+  COMPLETED
+}
+
+model Enrollment {
+  // N:M explícita: tabla puente con campos extra
+  id         Int              @id @default(autoincrement())
+  studentId  Int
+  courseId   Int
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
+  student    Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  // evita duplicados (un estudiante no se matricula 2 veces al mismo curso)
+  @@unique([studentId, courseId])
+  @@index([courseId])
 }
